@@ -24,7 +24,7 @@ export default function Home() {
             <Register />
           </div>
           <h1 className="text-5xl max-sm:text-center font-semibold">
-            Ruklist Waitlist{" "}
+            Waitlist Starter{" "}
           </h1>
           <p className=" max-w-[700px] max-sm:text-center text-md sm:text-lg text-muted-foreground">
             Minimal waitlist is a simple waitlist for SaaS products. It is built with Next.js and Tailwind CSS.
@@ -37,7 +37,7 @@ export default function Home() {
         </div>
         <div className="pt-10">
           <p className="text-sm font-medium text-muted-foreground">
-            Powered with Postgres & Redis by <a href="https://ruklist.com/" target="_blank" className="text-primary font-semibold underline">Ruklist</a>
+            Powered with Postgres & Redis. <a href="https://github.com/ColdranAI/waitlist-starter" target="_blank" className="text-primary font-semibold underline">Github Repo</a>
           </p>
         </div>
       </div>
