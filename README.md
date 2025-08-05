@@ -54,6 +54,16 @@ services:
     type: nodejs@20
     buildFromGit: https://github.com/ColdranAI/waitlist-starter
     enableSubdomainAccess: true
+
+  - hostname: redis
+    type: valkey@7.2
+    mode: NON_HA
+    priority: 10
+
+  - hostname: db
+    type: postgresql@16
+    mode: NON_HA
+    priority: 10
 ```
 
 You can assign the `DISCORD_WEBHOOK_URL`environment variable in the service dashboard.
