@@ -81,13 +81,13 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
                     <div className="text-center space-y-4">
                         <div className="p-4 rounded-lg text-sm font-medium bg-green-50 text-green-800 border border-green-200">
                             {status.message || `🎉 You're on the waitlist with ${email}!`}
-                            <a href="">Join Discord Server</a>
                         </div>
-                        
+                        <br />
+                        <br />
                         {/* Discord/Community Button */}
                         {process.env.NEXT_PUBLIC_DISCORD_INVITE && (
                             <div className="pt-2 space-y-2">
-                                <p className="text-sm text-gray-600">Join Discord server</p>
+                                <p className="text-sm text-gray-600">Join our Discord server</p>
                                 <a 
                                     href={process.env.NEXT_PUBLIC_DISCORD_INVITE} 
                                     target="_blank"
