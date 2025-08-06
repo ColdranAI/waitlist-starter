@@ -100,10 +100,44 @@ export class ClientUtils {
   }
 
   // Check if user has exceeded attempt limit (client-side check)
-  static hasExceededAttempts(email: string, maxAttempts: number = 2): boolean {
+  static hasExceededAttempts(email: string, maxAttempts: number = 3): boolean {
     const state = this.getSignupState()
     if (!state) return false
     
+    // Check if it's been more than 1 hour since last attempt
+    const oneHourAgo = Date.now() - (60 * 60 * 1000)
+    if (state.timestamp < oneHourAgo) {
+      // Reset attempts if it's been more than an hour
+      this.clearSignupState()
+      return false
+    }
+    
     return state.email.toLowerCase() === email.toLowerCase() && state.attempts >= maxAttempts
+  }
+
+  // Check if user has already successfully signed up (different from attempts)
+  static hasSuccessfullySignedUp(email: string): boolean {
+    if (typeof window === 'undefined') return false
+    
+    try {
+      const successKey = `waitlist_success_${email.toLowerCase()}`
+      const success = localStorage.getItem(successKey)
+      return success === 'true'
+    } catch (error) {
+      console.error('Error checking success state:', error)
+      return false
+    }
+  }
+
+  // Mark email as successfully signed up (separate from attempts)
+  static markAsSuccessfullySignedUp(email: string): void {
+    if (typeof window === 'undefined') return
+    
+    try {
+      const successKey = `waitlist_success_${email.toLowerCase()}`
+      localStorage.setItem(successKey, 'true')
+    } catch (error) {
+      console.error('Error marking success state:', error)
+    }
   }
 } 

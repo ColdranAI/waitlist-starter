@@ -20,33 +20,31 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
 
     // Check if user has already signed up on component mount
     useEffect(() => {
-        // Only check localStorage on mount, don't automatically set signed up state
+        // Only check localStorage on mount for logging, don't change UI state
         const state = ClientUtils.getSignupState()
         if (state) {
-            // Don't automatically set hasSignedUp here, let the form handle it
             console.log('Found existing signup state:', state.email)
+            // Don't automatically show success state - only show it after form submission
         }
     }, [])
 
     async function handleSubmit(formData: FormData) {
         const emailValue = formData.get('email') as string
         
-        // Only check localStorage if user is trying the exact same email
-        const localState = ClientUtils.getSignupState()
-        if (localState && localState.email.toLowerCase() === emailValue.toLowerCase()) {
+        // Check if user has already successfully signed up with this email
+        if (ClientUtils.hasSuccessfullySignedUp(emailValue)) {
             setStatus({
-                success: true,
-                message: `You've already signed up with ${emailValue} in this session! 🚀`
+                success: false,
+                message: `You've already successfully signed up with ${emailValue}. Check your email for updates!`
             })
-            setHasSignedUp(true)
-            setEmail(emailValue)
             return
         }
 
-        if (ClientUtils.hasExceededAttempts(emailValue, 5)) {
+        // Check if user has exceeded attempt limits
+        if (ClientUtils.hasExceededAttempts(emailValue, 3)) {
             setStatus({
                 success: false,
-                message: 'You have exceeded the maximum number of signup attempts for today.'
+                message: 'You have exceeded the maximum number of signup attempts. Please try again later.'
             })
             return
         }
@@ -58,8 +56,8 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
         setIsPending(false)
         
         if (response.success) {
-            // Only mark as signed up and set state on SUCCESS
-            ClientUtils.markAsSignedUp(emailValue)
+            // Mark as successfully signed up (separate from attempts tracking)
+            ClientUtils.markAsSuccessfullySignedUp(emailValue)
             setHasSignedUp(true)
             setEmail(emailValue)
             

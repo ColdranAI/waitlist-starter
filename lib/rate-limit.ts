@@ -4,7 +4,7 @@ import { redis } from './redis'
 export async function checkWaitlistRateLimit(ip: string) {
   const key = `waitlist:rate:${ip}`
   const windowSec = 60 // 60 seconds window
-  const limit = 10 // allow 10 requests per minute per IP
+  const limit = 3 // allow only 3 requests per minute per IP (more restrictive)
   
   try {
     console.log(`Checking rate limit for IP: ${ip}`)
@@ -126,4 +126,78 @@ export async function checkGeneralRateLimit(ip: string, endpoint: string = 'gene
       resetTime: new Date(Date.now() + windowSec * 1000)
     }
   }
-} 
+}
+
+// Email-based rate limiting to prevent spam from same email across different IPs
+export async function checkEmailRateLimit(email: string) {
+  const key = `waitlist:email:${email.toLowerCase()}`
+  const windowSec = 3600 // 1 hour window
+  const limit = 5 // allow only 5 attempts per hour per email
+  
+  try {
+    console.log(`Checking email rate limit for: ${email}`)
+    
+    const current = await redis.get<string>(key)
+    
+    if (!current) {
+      console.log(`✅ First attempt for email ${email} - rate limit OK`)
+      return {
+        success: true,
+        remaining: limit - 1,
+        resetTime: new Date(Date.now() + windowSec * 1000)
+      }
+    }
+    
+    const currentCount = parseInt(current)
+    
+    if (currentCount >= limit) {
+      const ttl = await redis.ttl(key)
+      console.log(`❌ Email rate limit exceeded for ${email}: ${currentCount}/${limit}`)
+      return {
+        success: false,
+        remaining: 0,
+        resetTime: new Date(Date.now() + ttl * 1000)
+      }
+    }
+    
+    const remaining = limit - (currentCount + 1)
+    console.log(`✅ Email rate limit OK for ${email}: ${currentCount}/${limit}`)
+    return {
+      success: true,
+      remaining,
+      resetTime: new Date(Date.now() + windowSec * 1000)
+    }
+    
+  } catch (error) {
+    console.error('Email rate limit check failed:', error)
+    return {
+      success: false,
+      remaining: 0,
+      resetTime: new Date(Date.now() + windowSec * 1000),
+      error: 'Email rate limiting service unavailable'
+    }
+  }
+}
+
+// Consume email rate limit
+export async function consumeEmailRateLimit(email: string) {
+  const key = `waitlist:email:${email.toLowerCase()}`
+  const windowSec = 3600 // 1 hour window
+  
+  try {
+    console.log(`Consuming email rate limit for: ${email}`)
+    
+    const current = await redis.get<string>(key)
+    
+    if (!current) {
+      await redis.setex(key, windowSec, "1")
+      console.log(`✅ Email rate limit consumed for ${email} (first attempt)`)
+    } else {
+      await redis.incr(key)
+      console.log(`✅ Email rate limit consumed for ${email}`)
+    }
+    
+  } catch (error) {
+    console.error('Failed to consume email rate limit:', error)
+  }
+}

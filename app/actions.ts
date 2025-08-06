@@ -1,7 +1,7 @@
 'use server'
 
 import { headers } from 'next/headers'
-import { checkWaitlistRateLimit, consumeWaitlistRateLimit } from '../lib/rate-limit'
+import { checkWaitlistRateLimit, consumeWaitlistRateLimit, checkEmailRateLimit, consumeEmailRateLimit } from '../lib/rate-limit'
 import { WaitlistService } from '../lib/database'
 import { getClientIP, isCloudflareRequest } from '../lib/ip-utils'
 import { sql } from 'drizzle-orm'
@@ -31,8 +31,8 @@ export async function joinWaitlist(formData: FormData) {
         }
     }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    // Enhanced email validation
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
     if (!emailRegex.test(email)) {
         console.log('❌ Email failed regex validation:', email)
         return {
@@ -41,25 +41,70 @@ export async function joinWaitlist(formData: FormData) {
         }
     }
 
+    // Check for suspicious patterns
+    const suspiciousPatterns = [
+        /test.*@/i,
+        /fake.*@/i,
+        /spam.*@/i,
+        /temp.*@/i,
+        /disposable.*@/i,
+        /@.*\.tk$/i,
+        /@.*\.ml$/i,
+        /@.*\.ga$/i,
+        /@.*\.cf$/i
+    ]
+
+    if (suspiciousPatterns.some(pattern => pattern.test(email))) {
+        console.log('❌ Email matches suspicious pattern:', email)
+        return {
+            success: false,
+            message: 'Please use a valid email address'
+        }
+    }
+
+    // Check email length
+    if (email.length > 254) {
+        console.log('❌ Email too long:', email.length)
+        return {
+            success: false,
+            message: 'Email address is too long'
+        }
+    }
+
     try {
         // 1. Check IP-based rate limiting (but don't consume quota yet)
-        console.log('🚦 Checking rate limit...')
-        const rateLimitResult = await checkWaitlistRateLimit(clientIP)
+        console.log('🚦 Checking IP rate limit...')
+        const ipRateLimitResult = await checkWaitlistRateLimit(clientIP)
         
-        if (!rateLimitResult.success) {
-            const resetMinutes = Math.ceil((rateLimitResult.resetTime.getTime() - Date.now()) / 1000 / 60)
-            console.log(`❌ Rate limit exceeded for IP ${clientIP}`)
+        if (!ipRateLimitResult.success) {
+            const resetMinutes = Math.ceil((ipRateLimitResult.resetTime.getTime() - Date.now()) / 1000 / 60)
+            console.log(`❌ IP rate limit exceeded for ${clientIP}`)
             return {
                 success: false,
-                message: `Too many requests. Please try again in ${resetMinutes} minute${resetMinutes !== 1 ? 's' : ''}.`
+                message: `Too many requests from your location. Please try again in ${resetMinutes} minute${resetMinutes !== 1 ? 's' : ''}.`
             }
         }
-        console.log(`✅ Rate limit OK (${rateLimitResult.remaining} remaining)`)
+        console.log(`✅ IP rate limit OK (${ipRateLimitResult.remaining} remaining)`)
 
-        // 2. Now consume the rate limit quota (after all verifications passed)
+        // 2. Check email-based rate limiting
+        console.log('📧 Checking email rate limit...')
+        const emailRateLimitResult = await checkEmailRateLimit(email)
+        
+        if (!emailRateLimitResult.success) {
+            const resetMinutes = Math.ceil((emailRateLimitResult.resetTime.getTime() - Date.now()) / 1000 / 60)
+            console.log(`❌ Email rate limit exceeded for ${email}`)
+            return {
+                success: false,
+                message: `Too many attempts with this email. Please try again in ${resetMinutes} minute${resetMinutes !== 1 ? 's' : ''}.`
+            }
+        }
+        console.log(`✅ Email rate limit OK (${emailRateLimitResult.remaining} remaining)`)
+
+        // 3. Now consume both rate limit quotas (after all verifications passed)
         await consumeWaitlistRateLimit(clientIP)
+        await consumeEmailRateLimit(email)
 
-        // 3. Add email to database (handles unique constraint automatically)
+        // 4. Add email to database (handles unique constraint automatically)
         console.log('📧 Adding email to waitlist...')
         const result = await WaitlistService.addEmail(email)
 
