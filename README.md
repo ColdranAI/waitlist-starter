@@ -1,9 +1,11 @@
 # Waitlist Starter
 
+Minimal Waitlist Page with Next.js + Drizzle + Postgres + Redis.
+
 <img width="894" height="431" alt="image" src="https://github.com/user-attachments/assets/de369877-a976-432d-aafc-088806cb92e2" />
 
+Watch [Tutorial Video](https://www.youtube.com/watch?v=dtFMS7W2K9k).
 
-Minimal Waitlist Page with Next.js + Drizzle + Postgres + Redis.
 
 ## How to import to zerops
 
