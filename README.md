@@ -1,8 +1,9 @@
-# Minimal Waitlist
+# Waitlist Starter
 
-![Frame 302](https://github.com/user-attachments/assets/647a0084-362c-4e55-a677-f78d5722eab5)
+<img width="894" height="431" alt="image" src="https://github.com/user-attachments/assets/de369877-a976-432d-aafc-088806cb92e2" />
 
-Minimal Waitlist Page with Discord Webhooks
+
+Minimal Waitlist Page with Next.js + Drizzle + Postgres + Redis.
 
 ## How to import to zerops
 
