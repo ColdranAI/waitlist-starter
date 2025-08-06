@@ -5,9 +5,6 @@ zerops:
       envVariables:
         REDIS_URL: redis://redis:6379
         DATABASE_URL: ${db_connectionTlsString}
-        NEXT_PUBLIC_TURNSTILE_SITE_KEY: 0x4AAAAAABmUsOaGja-PzTWf
-        TURNSTILE_SECRET_KEY: 0x4AAAAAABmUsAvdqLCS8hWpQMxp5x3EXMA
-        NEXT_PUBLIC_DISCORD_INVIE: https://discord.gg/vnReNt4J7T
         NODE_ENV: production
       buildCommands:
         - pnpm i
@@ -19,9 +16,6 @@ zerops:
       envVariables:
         REDIS_URL: redis://redis:6379
         DATABASE_URL: ${db_connectionTlsString}
-        NEXT_PUBLIC_TURNSTILE_SITE_KEY: 0x4AAAAAABmUsOaGja-PzTWf
-        TURNSTILE_SECRET_KEY: 0x4AAAAAABmUsAvdqLCS8hWpQMxp5x3EXMA
-        NEXT_PUBLIC_DISCORD_INVIE: https://discord.gg/vnReNt4J7T
         NODE_ENV: production
       ports:
         - port: 3000

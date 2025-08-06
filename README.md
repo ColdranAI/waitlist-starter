@@ -66,7 +66,14 @@ services:
     priority: 10
 ```
 
-You can assign the `DISCORD_WEBHOOK_URL`environment variable in the service dashboard.
+You can assign these environment variable in the service dashboard.
+
+```bash
+DISCORD_WEBHOOK_URL: https://discord.gg/w
+NEXT_PUBLIC_TURNSTILE_SITE_KEY: 0x4AAAAAABmUsOaGja-PzTWf
+TURNSTILE_SECRET_KEY: 0x4AAAAAABmUsAvdqLCS8hWpQMxp5x3EXMA
+NEXT_PUBLIC_DISCORD_INVITE: https://discord.gg/vnReNt4J7T
+```
 
 Make sure to create and copy your webhook URL from your Discord server:
 
