@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useState, useCallback } from 'react'
-import { WaitlistForm } from "../components/waitlist-form"
-import { WaitlistStats } from "../components/waitlist-stats"
-import { Sparkles } from 'lucide-react'
-import "./globals.css"
-import { Register } from "../components/register"
+import { useState, useCallback } from "react";
+import { WaitlistForm } from "../components/waitlist-form";
+import { WaitlistStats } from "../components/waitlist-stats";
+import { Sparkles } from "lucide-react";
+import "./globals.css";
+import { Register } from "../components/register";
 
 export default function Home() {
-  const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0)
+  const [statsRefreshTrigger, setStatsRefreshTrigger] = useState(0);
 
   const handleEmailSubmitted = useCallback(() => {
     // Trigger stats refresh by updating the key
-    console.log('Email submitted, triggering stats refresh...')
-    setStatsRefreshTrigger(prev => prev + 1)
-  }, [])
+    console.log("Email submitted, triggering stats refresh...");
+    setStatsRefreshTrigger((prev) => prev + 1);
+  }, []);
 
   return (
     <main className="pb-20 md:pb-0 min-h-screen p-4 max-w-4xl mx-auto max-lg:px-10">
@@ -27,7 +27,8 @@ export default function Home() {
             Waitlist Starter{" "}
           </h1>
           <p className=" max-w-[700px] max-sm:text-center text-md sm:text-lg text-muted-foreground">
-            Minimal waitlist is a simple waitlist for SaaS products. It is built with Next.js and Tailwind CSS.
+            Minimal waitlist is a simple waitlist for SaaS products. It is built
+            with Next.js and Tailwind CSS.
           </p>
         </div>
         <WaitlistForm onEmailSubmitted={handleEmailSubmitted} />
@@ -37,26 +38,33 @@ export default function Home() {
         </div>
         <div className="pt-10">
           <p className="text-sm font-medium text-muted-foreground">
-            Powered with Postgres & Redis. <a href="https://github.com/ColdranAI/waitlist-starter" target="_blank" className="text-primary font-semibold underline">Github Repo</a>
+            Powered with Postgres & Redis.{" "}
+            <a
+              href="https://github.com/ColdranAI/waitlist-starter"
+              target="_blank"
+              className="text-primary font-semibold underline"
+            >
+              Github Repo
+            </a>
           </p>
         </div>
       </div>
     </main>
-  )
+  );
 }
 
 const features = [
   {
-    title: 'Discord Webhook',
-    description: 'Sends a webhook to your discord channel when someone joins the waitlist.',
+    title: "Discord Webhook",
+    description:
+      "Sends a webhook to your discord channel when someone joins the waitlist.",
   },
   {
-    title: 'Rate Limit',
-    description: 'Rate limits the requests for each IP address for 1 hour.',
+    title: "Rate Limit",
+    description: "Rate limits the requests for each IP address for 1 hour.",
   },
   {
-    title: 'Fast & Reliable',
-    description: 'Built with Next.js and Tailwind CSS and deployed on Zerops.',
+    title: "Fast & Reliable",
+    description: "Built with Next.js and Tailwind CSS and deployed on Zerops.",
   },
-]
-
+];

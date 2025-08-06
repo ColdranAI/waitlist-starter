@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { getWaitlistStats } from '../app/actions';
+import { useState, useEffect } from "react";
+import { getWaitlistStats } from "../app/actions";
 
 interface WaitlistStatsProps {
   forceRefresh?: boolean;
@@ -19,22 +19,22 @@ export function WaitlistStats({ forceRefresh }: WaitlistStatsProps) {
       if (totalMembers !== null) {
         setIsUpdating(true);
       }
-      
+
       try {
-        console.log('Fetching waitlist stats...');
+        console.log("Fetching waitlist stats...");
         const result = await getWaitlistStats();
-        console.log('Stats result:', result);
-        
+        console.log("Stats result:", result);
+
         if (result.success && result.data) {
           setTotalMembers(result.data.totalEntries);
           setError(null); // Clear any previous errors
-          console.log('Stats updated to:', result.data.totalEntries);
+          console.log("Stats updated to:", result.data.totalEntries);
         } else {
-          console.warn('Stats fetch returned non-success:', result);
+          console.warn("Stats fetch returned non-success:", result);
           // Don't set error here, just keep the previous value
         }
       } catch (err) {
-        console.error('Stats fetch error:', err);
+        console.error("Stats fetch error:", err);
         // Don't hide the component on error, just log it
       } finally {
         setLoading(false);
@@ -48,7 +48,8 @@ export function WaitlistStats({ forceRefresh }: WaitlistStatsProps) {
   if (loading) {
     return (
       <div className="pl-2 text-sm text-gray-600 flex items-center gap-1">
-        <div className="animate-pulse bg-gray-300 h-5 w-5 rounded"></div>people joined
+        <div className="animate-pulse bg-gray-300 h-5 w-5 rounded"></div>people
+        joined
       </div>
     );
   }
@@ -59,11 +60,14 @@ export function WaitlistStats({ forceRefresh }: WaitlistStatsProps) {
   return (
     <div className="pl-2 text-sm text-gray-600">
       <p>
-        <span className={`font-semibold text-gray-900 transition-all duration-300 ${
-          isUpdating ? 'animate-pulse text-green-600' : ''
-        }`}>
+        <span
+          className={`font-semibold text-gray-900 transition-all duration-300 ${
+            isUpdating ? "animate-pulse text-green-600" : ""
+          }`}
+        >
           {displayCount.toLocaleString()}
-        </span> people joined
+        </span>{" "}
+        people joined
         {isUpdating && (
           <span className="ml-1 text-green-600 animate-pulse">↗</span>
         )}
@@ -73,4 +77,4 @@ export function WaitlistStats({ forceRefresh }: WaitlistStatsProps) {
       </p>
     </div>
   );
-} 
+}

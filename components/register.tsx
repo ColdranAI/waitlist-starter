@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
 export function Register() {
   return (
     <div className="max-w-fit items-center justify-center max-sm:hidden">
-      <a 
-        href="https://coldran.com/" 
+      <a
+        href="https://coldran.com/"
         target="_blank"
         rel="noopener noreferrer"
         className="cursor-pointer"

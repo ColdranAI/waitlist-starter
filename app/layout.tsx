@@ -4,13 +4,14 @@ import "./globals.css";
 import Footer from "../components/footer";
 
 const inter = Inter({
-  subsets: ['latin'],
+  subsets: ["latin"],
   variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
   title: "Minimal Waitlist - Simple Waitlist for SaaS",
-  description: "A minimal, modern waitlist solution for SaaS products. Built with Next.js and Tailwind CSS, featuring Discord webhooks and a clean user interface.",
+  description:
+    "A minimal, modern waitlist solution for SaaS products. Built with Next.js and Tailwind CSS, featuring Discord webhooks and a clean user interface.",
   icons: {
     icon: "/favicon.png",
     shortcut: "/favicon.png",
@@ -18,30 +19,34 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Minimal Waitlist - Simple Waitlist for SaaS",
-    description: "A minimal, modern waitlist solution for SaaS products. Built with Next.js and Tailwind CSS, featuring Discord webhooks and a clean user interface.",
-    images: [{
-      url: 'https://waitlist.zerops.xyz/og.webp',
-      width: 1200,
-      height: 630,
-      alt: 'Minimal Waitlist'
-    }],
-    type: 'website',
+    description:
+      "A minimal, modern waitlist solution for SaaS products. Built with Next.js and Tailwind CSS, featuring Discord webhooks and a clean user interface.",
+    images: [
+      {
+        url: "https://waitlist.zerops.xyz/og.webp",
+        width: 1200,
+        height: 630,
+        alt: "Minimal Waitlist",
+      },
+    ],
+    type: "website",
   },
   twitter: {
-    card: 'summary_large_image',
+    card: "summary_large_image",
     title: "Minimal Waitlist - Simple Waitlist for SaaS",
-    description: "A minimal, modern waitlist solution for SaaS products. Built with Next.js and Tailwind CSS, featuring Discord webhooks and a clean user interface.",
-    images: ['https://waitlist.zerops.xyz/og.webp'],
+    description:
+      "A minimal, modern waitlist solution for SaaS products. Built with Next.js and Tailwind CSS, featuring Discord webhooks and a clean user interface.",
+    images: ["https://waitlist.zerops.xyz/og.webp"],
   },
   keywords: [
-    'waitlist',
-    'saas',
-    'nextjs',
-    'tailwindcss',
-    'discord webhook',
-    'minimal design',
-    'open source'
-  ]
+    "waitlist",
+    "saas",
+    "nextjs",
+    "tailwindcss",
+    "discord webhook",
+    "minimal design",
+    "open source",
+  ],
 };
 
 export default function RootLayout({
@@ -51,8 +56,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-      </head>
+      <head></head>
       <body
         className={`${inter.variable} antialiased flex flex-col min-h-screen`}
       >

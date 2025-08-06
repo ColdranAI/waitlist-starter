@@ -43,9 +43,7 @@
         "waitlist_entries_email_unique": {
           "name": "waitlist_entries_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},

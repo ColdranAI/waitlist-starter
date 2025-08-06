@@ -1,9 +1,11 @@
 # Minimal Waitlist
+
 ![Frame 302](https://github.com/user-attachments/assets/647a0084-362c-4e55-a677-f78d5722eab5)
 
 Minimal Waitlist Page with Discord Webhooks
 
 ## How to import to zerops
+
 Go to zerops dashboard and import this project:
 
 ```yml
@@ -43,7 +45,7 @@ Create a new webhook and copy the webhook URL.
 ### How to export emails to json in discord channel
 
 1. Go to your waitlist channel on your browser and open developer tools and paste the code block in console.
-   
+
 ```javascript
 const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
@@ -54,12 +56,11 @@ const emails = new Set(allText.match(emailRegex));
 const emailArray = Array.from(emails);
 const emailJSON = JSON.stringify(emailArray, null, 2);
 
-const blob = new Blob([emailJSON], { type: 'application/json' });
-const link = document.createElement('a');
+const blob = new Blob([emailJSON], { type: "application/json" });
+const link = document.createElement("a");
 link.href = URL.createObjectURL(blob);
-link.download = 'waitlist-emails.json';
+link.download = "waitlist-emails.json";
 link.click();
 
 console.log("Waitlist exported!!", emailArray);
-
 ```
