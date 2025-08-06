@@ -9,7 +9,7 @@ zerops:
       buildCommands:
         - pnpm i
         - pnpm run build
-        - pnpm drizzle-kit push
+        - pnpm drizzle-kit migrate
       deployFiles: ./
     run: 
       base: nodejs@20
