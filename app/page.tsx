@@ -27,7 +27,7 @@ export default function Home() {
             Waitlist Starter{" "}
           </h1>
           <p className=" max-w-[700px] max-sm:text-center text-md sm:text-lg text-muted-foreground">
-            Minimal waitlist is a simple waitlist for SaaS products. It is built
+            Minimal waitlist with Discord Alerts. Built
             with Next.js + Drizzle + Postgres + Redis + Tailwind CSS.
           </p>
         </div>
