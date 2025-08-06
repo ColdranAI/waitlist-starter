@@ -4,16 +4,13 @@ import { headers } from 'next/headers'
 import { checkWaitlistRateLimit, consumeWaitlistRateLimit } from '../lib/rate-limit'
 import { WaitlistService } from '../lib/database'
 import { getClientIP, isCloudflareRequest } from '../lib/ip-utils'
-import { verifyTurnstileToken } from '../lib/turnstile'
 import { sql } from 'drizzle-orm'
 
 export async function joinWaitlist(formData: FormData) {
     const email = formData.get('email')
-    const turnstileToken = formData.get('cf-turnstile-response') as string
 
     console.log('=== Starting waitlist join process ===')
     console.log('Email:', email)
-    console.log('Turnstile token present:', !!turnstileToken)
 
     // Get real client IP from Cloudflare headers
     const headersList = await headers()
@@ -45,24 +42,7 @@ export async function joinWaitlist(formData: FormData) {
     }
 
     try {
-        // 1. Verify Turnstile token (bot protection) - FIRST, before any state changes
-        if (process.env.TURNSTILE_SECRET_KEY) {
-            console.log('🔒 Verifying Turnstile token...')
-            const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIP)
-            
-            if (!turnstileResult.success) {
-                console.log('❌ Turnstile verification failed:', turnstileResult.error)
-                return {
-                    success: false,
-                    message: 'Bot verification failed. Please try again.'
-                }
-            }
-            console.log('✅ Turnstile verification passed')
-        } else {
-            console.log('⚠️ Turnstile not configured, skipping verification')
-        }
-
-        // 2. Check IP-based rate limiting (but don't consume quota yet)
+        // 1. Check IP-based rate limiting (but don't consume quota yet)
         console.log('🚦 Checking rate limit...')
         const rateLimitResult = await checkWaitlistRateLimit(clientIP)
         
@@ -76,10 +56,10 @@ export async function joinWaitlist(formData: FormData) {
         }
         console.log(`✅ Rate limit OK (${rateLimitResult.remaining} remaining)`)
 
-        // 3. Now consume the rate limit quota (after all verifications passed)
+        // 2. Now consume the rate limit quota (after all verifications passed)
         await consumeWaitlistRateLimit(clientIP)
 
-        // 4. Add email to database (handles unique constraint automatically)
+        // 3. Add email to database (handles unique constraint automatically)
         console.log('📧 Adding email to waitlist...')
         const result = await WaitlistService.addEmail(email)
 
@@ -150,8 +130,6 @@ export async function healthCheck() {
         const envCheck = {
             DATABASE_URL: !!process.env.DATABASE_URL,
             REDIS_URL: !!process.env.REDIS_URL,
-            TURNSTILE_SECRET_KEY: !!process.env.TURNSTILE_SECRET_KEY,
-            NEXT_PUBLIC_TURNSTILE_SITE_KEY: !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
             NODE_ENV: process.env.NODE_ENV
         }
         console.log('Environment variables check:', envCheck)
@@ -184,8 +162,7 @@ export async function healthCheck() {
             timestamp: new Date().toISOString(),
             services: {
                 database: 'healthy',
-                redis: 'healthy',
-                turnstile: process.env.TURNSTILE_SECRET_KEY ? 'configured' : 'not configured'
+                redis: 'healthy'
             },
             environment: envCheck,
             stats: {

@@ -1,30 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import { joinWaitlist } from '../app/actions'
 import { ClientUtils } from '../lib/client-utils'
 
 interface WaitlistFormProps {
     onEmailSubmitted?: () => void
-}
-
-// Declare Turnstile type for TypeScript
-declare global {
-    interface Window {
-        turnstile: {
-            render: (element: string | HTMLElement, options: {
-                sitekey: string;
-                callback: (token: string) => void;
-                'error-callback'?: (error?: any) => void;
-                theme?: 'light' | 'dark';
-                size?: 'normal' | 'compact';
-            }) => string;
-            reset: (widgetId?: string) => void;
-            ready: (callback: () => void) => void;
-            getResponse: (widgetId: string) => string | null;
-        }
-    }
 }
 
 export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
@@ -35,82 +17,6 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
     const [isPending, setIsPending] = useState(false)
     const [email, setEmail] = useState('')
     const [hasSignedUp, setHasSignedUp] = useState(false)
-    const [turnstileToken, setTurnstileToken] = useState<string>('')
-    const [turnstileLoaded, setTurnstileLoaded] = useState(false)
-    const turnstileRef = useRef<HTMLDivElement>(null)
-    const widgetId = useRef<string>('')
-
-    // Initialize Turnstile when ready (script is loaded in layout head)
-    useEffect(() => {
-        if (!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
-            console.log('Turnstile not configured, skipping')
-            setTurnstileLoaded(true)
-            return
-        }
-
-        console.log('NEXT_PUBLIC_TURNSTILE_SITE_KEY:', process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
-
-        // Check if Turnstile is already available
-        if (window.turnstile) {
-            console.log('Turnstile already available')
-            setTurnstileLoaded(true)
-            return
-        }
-
-        // Wait for Turnstile to be ready
-        const checkTurnstile = () => {
-            if (window.turnstile) {
-                console.log('Turnstile script loaded and ready')
-                setTurnstileLoaded(true)
-            } else {
-                console.log('Waiting for Turnstile script to load...')
-                // Check again after a short delay
-                setTimeout(checkTurnstile, 100)
-            }
-        }
-
-        checkTurnstile()
-    }, [])
-
-    // Initialize Turnstile widget
-    useEffect(() => {
-        if (turnstileLoaded && window.turnstile && turnstileRef.current && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
-            console.log('Initializing Turnstile widget')
-            console.log('Turnstile ref element:', turnstileRef.current)
-            console.log('Site key:', process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
-            
-            try {
-                widgetId.current = window.turnstile.render(turnstileRef.current, {
-                    sitekey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-                    callback: (token: string) => {
-                        console.log('✅ Turnstile token received:', token?.substring(0, 20) + '...')
-                        setTurnstileToken(token)
-                    },
-                    'error-callback': (error: any) => {
-                        console.error('❌ Turnstile error callback:', error)
-                        setTurnstileToken('')
-                    },
-                    theme: 'light',
-                    size: 'normal'
-                })
-                console.log('✅ Turnstile widget initialized with ID:', widgetId.current)
-            } catch (error) {
-                console.error('❌ Failed to initialize Turnstile:', error)
-            }
-        } else {
-            console.log('Turnstile initialization conditions:', {
-                turnstileLoaded,
-                windowTurnstile: !!window.turnstile,
-                refElement: !!turnstileRef.current,
-                siteKey: !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
-            })
-        }
-    }, [turnstileLoaded])
-
-    // Debug token state
-    useEffect(() => {
-        console.log('Turnstile token state changed:', turnstileToken ? 'Token present' : 'No token')
-    }, [turnstileToken])
 
     // Check if user has already signed up on component mount
     useEffect(() => {
@@ -124,38 +30,6 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
 
     async function handleSubmit(formData: FormData) {
         const emailValue = formData.get('email') as string
-        
-        // Try to get token from callback (primary method)
-        let tokenToSend = turnstileToken
-        
-        // Fallback: try to get token directly from Turnstile widget
-        if (!tokenToSend && window.turnstile && widgetId.current) {
-            try {
-                const directToken = window.turnstile.getResponse(widgetId.current)
-                if (directToken) {
-                    console.log('🔄 Got token via getResponse() fallback:', directToken.substring(0, 20) + '...')
-                    tokenToSend = directToken
-                } else {
-                    console.log('❌ No token available via getResponse() either')
-                }
-            } catch (error) {
-                console.error('❌ Error getting token via getResponse():', error)
-            }
-        }
-        
-        console.log('Token methods summary:', {
-            callbackToken: turnstileToken ? 'Present' : 'Missing',
-            directToken: tokenToSend !== turnstileToken ? 'Used fallback' : 'Used callback',
-            finalToken: tokenToSend ? 'Present' : 'Missing'
-        })
-        
-        // Add Turnstile token to form data
-        if (tokenToSend) {
-            formData.append('cf-turnstile-response', tokenToSend)
-            console.log('✅ Added token to form data')
-        } else {
-            console.log('❌ No token available to send')
-        }
         
         // Only check localStorage if user is trying the exact same email
         const localState = ClientUtils.getSignupState()
@@ -179,27 +53,9 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
 
         setIsPending(true)
         
-        // Check if Turnstile is configured and token is required
-        if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !tokenToSend) {
-            setStatus({
-                success: false,
-                message: 'Please complete the security verification first.'
-            })
-            setIsPending(false)
-            return
-        }
-        
-        // DO NOT increment attempts here - wait for server verification first
-        
         const response = await joinWaitlist(formData)
         setStatus(response)
         setIsPending(false)
-        
-        // Reset Turnstile widget regardless of outcome
-        if (window.turnstile && widgetId.current) {
-            window.turnstile.reset(widgetId.current)
-            setTurnstileToken('')
-        }
         
         if (response.success) {
             // Only mark as signed up and set state on SUCCESS
@@ -213,10 +69,7 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
             }, 500)
         } else {
             // Only increment attempts on FAILED attempts (after server validation)
-            // This ensures bots don't get counted, but real users who fail validation do
-            if (response.message && !response.message.includes('Bot verification failed')) {
-                ClientUtils.incrementAttempts(emailValue)
-            }
+            ClientUtils.incrementAttempts(emailValue)
         }
     }
 
@@ -282,29 +135,6 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
                 </form>
             </div>
 
-            {/* Turnstile Widget */}
-            {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
-                <div className="flex justify-center">
-                    <div className="space-y-2">
-                        <div ref={turnstileRef}></div>
-                        {!turnstileLoaded && (
-                            <div className="text-xs text-gray-500 text-center">
-                                Loading bot protection...
-                            </div>
-                        )}
-                        {turnstileLoaded && !turnstileToken && (
-                            <div className="text-xs text-amber-600 text-center">
-                                Please complete the security check above
-                            </div>
-                        )}
-                        {turnstileToken && (
-                            <div className="text-xs text-green-600 text-center">
-                                ✓ Security check completed
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
 
             {status.message && (
                 <div className="space-y-4">

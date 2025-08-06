@@ -1,49 +1,9 @@
 # Minimal Waitlist
 ![Frame 302](https://github.com/user-attachments/assets/647a0084-362c-4e55-a677-f78d5722eab5)
 
-Minimal Waitlist Page with Discord Webhooks and Cloudflare Turnstile Bot Protection
+Minimal Waitlist Page with Discord Webhooks
 
-## 🛡️ Cloudflare Turnstile Setup
-
-This project includes Cloudflare Turnstile for bot protection. Follow these steps to set it up properly:
-
-### 1. Get Turnstile Keys
-
-1. Go to the [Cloudflare Dashboard](https://dash.cloudflare.com/)
-2. Navigate to **Turnstile** in the sidebar
-3. Click **Add widget**
-4. Fill in:
-   - **Site name**: Your waitlist name
-   - **Hostname**: Your domain (e.g., `example.com`)
-   - **Widget mode**: Choose based on your needs
-     - **Managed**: Recommended for most cases
-     - **Non-interactive**: Invisible to users
-     - **Invisible**: Completely invisible
-5. Copy your **Site Key** and **Secret Key**
-
-### 2. Configure Environment Variables
-
-Add these to your `.env.local` file:
-
-```bash
-# Cloudflare Turnstile (Bot Protection)
-NEXT_PUBLIC_TURNSTILE_SITE_KEY="1x00000000000000000000AA"  # Your site key (public)
-TURNSTILE_SECRET_KEY="1x0000000000000000000000000000000AA"  # Your secret key (private)
-```
-
-### 4. Testing
-
-For testing, you can use Cloudflare's test keys:
-
-```bash
-# Test Site Key (always passes)
-NEXT_PUBLIC_TURNSTILE_SITE_KEY="1x00000000000000000000AA"
-
-# Test Secret Key (always passes)  
-TURNSTILE_SECRET_KEY="1x0000000000000000000000000000000AA"
-```
-
-### How to import to zerops
+## How to import to zerops
 Go to zerops dashboard and import this project:
 
 ```yml
@@ -69,10 +29,8 @@ services:
 You can assign these environment variable in the service dashboard.
 
 ```bash
-DISCORD_WEBHOOK_URL: https://discord.gg/w
-NEXT_PUBLIC_TURNSTILE_SITE_KEY: 0x4AAAAAABmUsOaGja-PzTWf
-TURNSTILE_SECRET_KEY: 0x4AAAAAABmUsAvdqLCS8hWpQMxp5x3EXMA
-NEXT_PUBLIC_DISCORD_INVITE: https://discord.gg/vnReNt4J7T
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1402505825284784199/rNID32_cyYjHvyiNmuKTrOXd75iAuE-T32kHCJEztcDhYk4ql4cp_G8Ix7QQXDJgVq-M
+NEXT_PUBLIC_DISCORD_INVITE=https://discord.gg/rDDqA83eGz
 ```
 
 Make sure to create and copy your webhook URL from your Discord server:
