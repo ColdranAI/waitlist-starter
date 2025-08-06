@@ -12,7 +12,6 @@ export async function joinWaitlist(formData: FormData) {
     console.log('=== Starting waitlist join process ===')
     console.log('Email:', email)
 
-    // Get real client IP from Cloudflare headers
     const headersList = await headers()
     const request = new Request('https://dummy.com', {
         headers: headersList
@@ -31,7 +30,6 @@ export async function joinWaitlist(formData: FormData) {
         }
     }
 
-    // Enhanced email validation
     const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
     if (!emailRegex.test(email)) {
         console.log('❌ Email failed regex validation:', email)
@@ -41,7 +39,6 @@ export async function joinWaitlist(formData: FormData) {
         }
     }
 
-    // Check for suspicious patterns
     const suspiciousPatterns = [
         /test.*@/i,
         /fake.*@/i,
@@ -62,7 +59,6 @@ export async function joinWaitlist(formData: FormData) {
         }
     }
 
-    // Check email length
     if (email.length > 254) {
         console.log('❌ Email too long:', email.length)
         return {
@@ -72,7 +68,6 @@ export async function joinWaitlist(formData: FormData) {
     }
 
     try {
-        // 1. Check IP-based rate limiting (but don't consume quota yet)
         console.log('🚦 Checking IP rate limit...')
         const ipRateLimitResult = await checkWaitlistRateLimit(clientIP)
         
@@ -86,7 +81,6 @@ export async function joinWaitlist(formData: FormData) {
         }
         console.log(`✅ IP rate limit OK (${ipRateLimitResult.remaining} remaining)`)
 
-        // 2. Check email-based rate limiting
         console.log('📧 Checking email rate limit...')
         const emailRateLimitResult = await checkEmailRateLimit(email)
         
@@ -100,20 +94,17 @@ export async function joinWaitlist(formData: FormData) {
         }
         console.log(`✅ Email rate limit OK (${emailRateLimitResult.remaining} remaining)`)
 
-        // 3. Now consume both rate limit quotas (after all verifications passed)
         await consumeWaitlistRateLimit(clientIP)
         await consumeEmailRateLimit(email)
 
-        // 4. Add email to database (handles unique constraint automatically)
         console.log('📧 Adding email to waitlist...')
         const result = await WaitlistService.addEmail(email)
 
         if (!result.success) {
             if (result.isExisting) {
-                // Email already exists in database - this is OK, just inform the user
                 console.log('✅ Email already in waitlist database')
                 return {
-                    success: true, // Return success so UI shows success state
+                    success: true,
                     message: "🎉 You're already on the waitlist! We'll be in touch soon."
                 }
             } else {
@@ -123,8 +114,6 @@ export async function joinWaitlist(formData: FormData) {
         }
 
         console.log('✅ Email successfully added to database, ID:', result.id)
-
-
 
         console.log('=== Waitlist join process completed successfully ===')
         return {
@@ -144,7 +133,6 @@ export async function joinWaitlist(formData: FormData) {
     }
 }
 
-// Get waitlist stats (public)
 export async function getWaitlistStats() {
     try {
         const stats = await WaitlistService.getStats()
@@ -155,7 +143,6 @@ export async function getWaitlistStats() {
     } catch (error) {
         console.error('Error fetching waitlist stats:', error)
         
-        // Return a fallback response instead of failing completely
         return {
             success: true,
             data: {
@@ -166,12 +153,10 @@ export async function getWaitlistStats() {
     }
 }
 
-// Health check endpoint
 export async function healthCheck() {
     try {
         console.log('Starting health check...')
         
-        // Check environment variables
         const envCheck = {
             DATABASE_URL: !!process.env.DATABASE_URL,
             REDIS_URL: !!process.env.REDIS_URL,
@@ -179,23 +164,20 @@ export async function healthCheck() {
         }
         console.log('Environment variables check:', envCheck)
 
-        // Check database connection
         console.log('Testing database connection...')
         const { db } = await import('../lib/db')
         const testQuery = await db.execute(sql`SELECT 1 as test`)
         console.log('Database test query result:', testQuery)
 
-        // Test database table access
         console.log('Testing waitlist_entries table access...')
         const tableTest = await db.execute(sql`
-          SELECT COUNT(*) as count 
+          SELECT COUNT(*) as count
           FROM waitlist_entries
         `)
         console.log('Table test result:', tableTest)
         const currentCount = Number(tableTest[0]?.count) || 0
         console.log('Current waitlist entries count:', currentCount)
 
-        // Check Redis connection
         console.log('Testing Redis connection...')
         const { redis } = await import('../lib/redis')
         const pingResult = await redis.ping()

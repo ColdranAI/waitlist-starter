@@ -18,20 +18,21 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
     const [email, setEmail] = useState('')
     const [hasSignedUp, setHasSignedUp] = useState(false)
 
-    // Check if user has already signed up on component mount
     useEffect(() => {
-        // Only check localStorage on mount for logging, don't change UI state
-        const state = ClientUtils.getSignupState()
-        if (state) {
-            console.log('Found existing signup state:', state.email)
-            // Don't automatically show success state - only show it after form submission
+        const successState = localStorage.getItem('waitlist_success_email')
+        if (successState) {
+            setHasSignedUp(true)
+            setEmail(successState)
+            setStatus({
+                success: true,
+                message: `🎉 You're on the waitlist with ${successState}!`
+            })
         }
     }, [])
 
     async function handleSubmit(formData: FormData) {
         const emailValue = formData.get('email') as string
         
-        // Check if user has already successfully signed up with this email
         if (ClientUtils.hasSuccessfullySignedUp(emailValue)) {
             setStatus({
                 success: false,
@@ -40,7 +41,6 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
             return
         }
 
-        // Check if user has exceeded attempt limits
         if (ClientUtils.hasExceededAttempts(emailValue, 3)) {
             setStatus({
                 success: false,
@@ -56,22 +56,19 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
         setIsPending(false)
         
         if (response.success) {
-            // Mark as successfully signed up (separate from attempts tracking)
             ClientUtils.markAsSuccessfullySignedUp(emailValue)
+            localStorage.setItem('waitlist_success_email', emailValue)
             setHasSignedUp(true)
             setEmail(emailValue)
             
-            // Trigger stats refresh with a small delay to ensure DB consistency
             setTimeout(() => {
                 onEmailSubmitted?.()
             }, 500)
         } else {
-            // Only increment attempts on FAILED attempts (after server validation)
             ClientUtils.incrementAttempts(emailValue)
         }
     }
 
-    // Success state - show when user successfully joined
     if (hasSignedUp && status.success) {
         return (
             <div className="max-w-lg space-y-4">
@@ -82,12 +79,11 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
                         </div>
                         <br />
                         <br />
-                        {/* Discord/Community Button */}
                         {process.env.NEXT_PUBLIC_DISCORD_INVITE && (
                             <div className="pt-2 space-y-2">
                                 <p className="text-sm text-gray-600">Join our Discord server</p>
-                                <a 
-                                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE} 
+                                <a
+                                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition-colors duration-200"
@@ -138,14 +134,13 @@ export function WaitlistForm({ onEmailSubmitted }: WaitlistFormProps) {
                 <div className="space-y-4">
                     <div
                         className={`p-4 rounded-lg text-sm font-medium ${
-                            status.success 
-                                ? 'bg-green-50 text-green-800 border border-green-200' 
+                            status.success
+                                ? 'bg-green-50 text-green-800 border border-green-200'
                                 : 'bg-red-50 text-red-800 border border-red-200'
                         }`}
                     >
                         {status.message}
                     </div>
-
                 </div>
             )}
         </div>

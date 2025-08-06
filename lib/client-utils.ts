@@ -1,5 +1,3 @@
-// Client-side utilities for managing waitlist signup state
-
 const STORAGE_KEY = 'waitlist_signup_state'
 
 interface SignupState {
@@ -9,7 +7,6 @@ interface SignupState {
 }
 
 export class ClientUtils {
-  // Check if user has already signed up with this email
   static hasSignedUp(email: string): boolean {
     if (typeof window === 'undefined') return false
     
@@ -25,7 +22,6 @@ export class ClientUtils {
     }
   }
 
-  // Mark email as signed up
   static markAsSignedUp(email: string): void {
     if (typeof window === 'undefined') return
     
@@ -41,7 +37,6 @@ export class ClientUtils {
     }
   }
 
-  // Increment attempt count
   static incrementAttempts(email: string): void {
     if (typeof window === 'undefined') return
     
@@ -75,7 +70,6 @@ export class ClientUtils {
     }
   }
 
-  // Get current signup state
   static getSignupState(): SignupState | null {
     if (typeof window === 'undefined') return null
     
@@ -88,7 +82,6 @@ export class ClientUtils {
     }
   }
 
-  // Clear signup state (for testing or reset)
   static clearSignupState(): void {
     if (typeof window === 'undefined') return
     
@@ -99,15 +92,12 @@ export class ClientUtils {
     }
   }
 
-  // Check if user has exceeded attempt limit (client-side check)
   static hasExceededAttempts(email: string, maxAttempts: number = 3): boolean {
     const state = this.getSignupState()
     if (!state) return false
     
-    // Check if it's been more than 1 hour since last attempt
     const oneHourAgo = Date.now() - (60 * 60 * 1000)
     if (state.timestamp < oneHourAgo) {
-      // Reset attempts if it's been more than an hour
       this.clearSignupState()
       return false
     }
@@ -115,7 +105,6 @@ export class ClientUtils {
     return state.email.toLowerCase() === email.toLowerCase() && state.attempts >= maxAttempts
   }
 
-  // Check if user has already successfully signed up (different from attempts)
   static hasSuccessfullySignedUp(email: string): boolean {
     if (typeof window === 'undefined') return false
     
@@ -129,7 +118,6 @@ export class ClientUtils {
     }
   }
 
-  // Mark email as successfully signed up (separate from attempts)
   static markAsSuccessfullySignedUp(email: string): void {
     if (typeof window === 'undefined') return
     
@@ -140,4 +128,4 @@ export class ClientUtils {
       console.error('Error marking success state:', error)
     }
   }
-} 
+}
