@@ -15,6 +15,13 @@
       "when": 1753301231997,
       "tag": "0001_bored_riptide",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754454522097,
+      "tag": "0002_chief_unicorn",
+      "breakpoints": true
     }
   ]
 }
