@@ -28,7 +28,7 @@ export default function Home() {
           </h1>
           <p className=" max-w-[700px] max-sm:text-center text-md sm:text-lg text-muted-foreground">
             Minimal waitlist is a simple waitlist for SaaS products. It is built
-            with Next.js and Tailwind CSS.
+            with Next.js + Drizzle + Postgres + Redis + Tailwind CSS.
           </p>
         </div>
         <WaitlistForm onEmailSubmitted={handleEmailSubmitted} />

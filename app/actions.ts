@@ -10,6 +10,7 @@ import {
 import { WaitlistService } from "../lib/database";
 import { getClientIP, isCloudflareRequest } from "../lib/ip-utils";
 import { sql } from "drizzle-orm";
+import { DiscordWebhookService } from "../lib/discord-webhook";
 
 export async function joinWaitlist(formData: FormData) {
   const email = formData.get("email");
@@ -128,6 +129,39 @@ export async function joinWaitlist(formData: FormData) {
     }
 
     console.log("✅ Email successfully added to database, ID:", result.id);
+
+    // Send Discord notification (non-blocking)
+    if (process.env.DISCORD_WEBHOOK_URL) {
+      console.log("📢 Sending Discord notification...");
+      try {
+        const headersList = await headers();
+        const discordRequest = new Request("https://dummy.com", {
+          headers: headersList,
+        });
+        
+        // Get current stats for the notification
+        const stats = await WaitlistService.getStats();
+        const totalEntries = stats?.totalEntries || 0;
+        
+        const discordResult = await DiscordWebhookService.notifyWaitlistSignup(
+          email,
+          discordRequest,
+          totalEntries
+        );
+        
+        if (discordResult.success) {
+          console.log("✅ Discord notification sent successfully");
+        } else {
+          console.log("⚠️ Discord notification failed:", discordResult.error);
+          // Don't fail the entire request if Discord notification fails
+        }
+      } catch (discordError) {
+        console.error("⚠️ Discord notification error:", discordError);
+        // Don't fail the entire request if Discord notification fails
+      }
+    } else {
+      console.log("ℹ️ Discord webhook not configured, skipping notification");
+    }
 
     console.log("=== Waitlist join process completed successfully ===");
     return {
