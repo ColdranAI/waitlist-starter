@@ -52,12 +52,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* Cloudflare Turnstile Script - Load in head as per official documentation */}
-        <script 
-          src="https://challenges.cloudflare.com/turnstile/v0/api.js" 
-          async 
-          defer
-        ></script>
+
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
       </head>
       <body
         className={`${inter.variable} antialiased flex flex-col min-h-screen`}
